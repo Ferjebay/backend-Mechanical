@@ -69,6 +69,8 @@ export class ComprobanteService {
 
     let url_xml = `https://bucket-images-magdata-mechanical-dev2.s3.us-east-2.amazonaws.com/SRI/MAGDATA+SOLUTIONS/Autorizados/${ data.factura.clave_acceso }.xml`;
 
+    console.log( url_xml );
+
       let url_image;
       if ( data.empresa.logo != null || data.empresa.logo) {
         const resp = await axios({ method: 'get', url: `${ data.empresa.logo }` }) 
