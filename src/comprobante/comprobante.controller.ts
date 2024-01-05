@@ -18,12 +18,17 @@ export class ComprobanteController {
 
   @Post('/getRidePdf')
   getRidePdf( @Body() data: any ){
-    this.comprobanteService.getRidePdf( data );
+    this.comprobanteService.getRidePdf( data, `${ process.env.URL_SERVER }/default.jpg` );
   }
 
   @Post('/enviarEmail')
   enviarEmail( @Body() data: any ){
     this.comprobanteService.enviarEmail( data );
+  }
+
+  @Post('/enviarCotizacion')
+  enviarCotizacion( @Body() data: any ){
+    this.comprobanteService.enviarCotizacion( data );
   }
 
 }

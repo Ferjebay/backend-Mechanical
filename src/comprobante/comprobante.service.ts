@@ -59,16 +59,23 @@ export class ComprobanteService {
     }
   }
 
-  async getRidePdf( data ){
+  async getRidePdf( data, url_image ){
     const factura = new Factura();
-    const bufferPDF = await factura.generarFacturaPDF( data );
+    const bufferPDF = await factura.generarFacturaPDF( data, url_image );
     return bufferPDF;
   }
 
   async enviarEmail( data ){
-      // const tipoComprobante = 'Proforma'
 
-      const buffer = await this.getRidePdf( data );
+      let url_image;
+      if ( data.empresa.logo != null || data.empresa.logo) {
+        const resp = await axios({ method: 'get', url: `${ data.empresa.logo }` }) 
+        url_image = resp.data;      
+      }else{
+        url_image = `${ process.env.URL_SERVER }/default.jpg`;     
+      }
+
+      const buffer = await this.getRidePdf( data, url_image );
 
       const config = {
         host: process.env.HOST,
@@ -85,16 +92,11 @@ export class ComprobanteService {
         to: `${ data.cliente.email }`
       }
   
-      // if (tipoComprobante == 'Proforma') {
-        message.subject = `${ data.empresa.nombre.toUpperCase() } - Factura Nro. ${ data.factura.num_comprobante }`,
-        message.text    = `${ data.empresa.nombre.toUpperCase() } agradece su compra :)`,      
-        message.attachments = [
-          { filename: `${ data.factura.clave_acceso }.pdf`, content: buffer }
-        ]      
-      // }else{
-        // message.subject = `${ data.empresa.nombre.toUpperCase() } - Factura Nro. ${ data.factura.num_comprobante }`,
-        // message.text    = `${ data.empresa.nombre.toUpperCase() } agradece su compra, acontinuación se adjunta su comprobante electronico`
-      // }
+      message.subject = `${ data.empresa.nombre.toUpperCase() } - Factura Nro. ${ data.factura.num_comprobante }`,
+      message.text    = `${ data.empresa.nombre.toUpperCase() } agradece su compra :)`,      
+      message.attachments = [
+        { filename: `${ data.factura.clave_acceso }.pdf`, content: buffer }
+      ]      
   
       const transport = nodemailer.createTransport(config);
   
@@ -108,6 +110,54 @@ export class ComprobanteService {
         else
           throw new BadRequestException('Fallo al enviar el correo');        
       }     
+  }
+
+  async enviarCotizacion( data ){
+
+    let url_image;
+    if ( data.cliente.empresa.logo != null || data.cliente.empresa.logo) {
+      const resp = await axios({ method: 'get', url: `${ data.cliente.empresa.logo }` }) 
+      url_image = resp.data;      
+    }else{
+      url_image = `${ process.env.URL_SERVER }/default.jpg`;     
+    }
+
+    const factura = new Factura();
+    const buffer = await factura.generarCotizacionPDF( data, url_image );
+
+    const config = {
+      host: process.env.HOST,
+      port: +process.env.PUERTO,
+      secure: +process.env.PUERTO === 465 ? true : false,
+      greetingTimeout: 12000,
+      connectionTimeout: 12000,
+      dnsTimeout: 12000,
+      auth: { user: process.env.USUARIO, pass: process.env.PASSWORD }
+    }
+
+    let message: any = {
+      from: process.env.USUARIO,
+      to: `${ data.cliente.persona.email }`
+    }
+
+    message.subject = `${ data.cliente.empresa.nombre_comercial.toUpperCase() } - le envia su cotización`,
+    message.text    = `${ data.cliente.empresa.nombre_comercial.toUpperCase() } - agradece su consulta `,      
+    message.attachments = [
+      { filename: `cotizacion.pdf`, content: buffer }
+    ]      
+
+    const transport = nodemailer.createTransport(config);
+
+    try {
+        await transport.sendMail(message);
+        return "Correo Enviado Exitosamente";      
+    } catch (error) {
+      console.log( error );
+      if ( error.code == 'EDNS' ) 
+        throw new BadRequestException(`Error: getaddrinfo ENOTFOUND -----`);        
+      else
+        throw new BadRequestException('Fallo al enviar el correo');        
+    }     
   }
 
 }
