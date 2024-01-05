@@ -122,18 +122,6 @@ export class ComprobanteService {
       }     
   }
 
-  generarCodigo() {
-    let codigo = '';
-    const caracteres = '0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz';
-  
-    for (let i = 0; i < 6; i++) {
-      const indiceAleatorio = Math.floor(Math.random() * caracteres.length);
-      codigo += caracteres.charAt(indiceAleatorio);
-    }
-  
-    return codigo;
-  }
-
   async enviarCotizacion( data ){
     const base_url_signedurl = 'https://74v4865l13.execute-api.us-east-1.amazonaws.com/dev/signedurl';   
 
@@ -149,8 +137,7 @@ export class ComprobanteService {
     const buffer = await factura.generarCotizacionPDF( data, url_image );
 
     //Guardar Reporte
-    const codigoAleatorio = this.generarCodigo();
-    const namePDF = `cotizacion-${ codigoAleatorio }.pdf`
+    const namePDF = `cotizacion-${ data.invoice_id }.pdf`
     console.log( namePDF );
 
     const resp = await axios.get(`${ base_url_signedurl }`, { 
