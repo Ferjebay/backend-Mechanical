@@ -57,7 +57,7 @@ export class Factura {
                   </label>
                   <label class="d-block">
                     <span class="fw-bolder">Obligado a llevar contabilidad:</span>
-                    ${ data.empresa.obligado_contabilidad }
+                    ${ data.empresa.obligado_contabilidad ? 'SI' : 'NO' }
                   </label>
                   <label class="d-block">
                     <span class="fw-bolder">CONTRIBUYENTE RÉGIMEN RIMPE</span>            
@@ -79,7 +79,7 @@ export class Factura {
                   <label>No. ${ data.factura.num_comprobante }</label>
                 </div>
         
-                <div class="mt-1 backColor py-3">
+                <div class="mt-1 backColor py-4">
                   <div>
                     <label class="fw-bolder">
                       Número de Autorización:
@@ -183,13 +183,13 @@ export class Factura {
                 data.productos.forEach(item => {
                   html += `
                     <tr class="text-center borderTrBottom">
-                        <td>${ item.codigo }</td>
+                        <td>${ item.codigoBarra }</td>
                         <td>${ item.cantidad }</td>
                         <td>${ item.nombre.toUpperCase() }</td>
                         <td></td>
                         <td>$${ item.pvp }</td>
-                        <td>${ item.descuento_pocentaje }%</td>
-                        <td>$${ item.v_total }</td>
+                        <td>${ item.descuento }%</td>
+                        <td>$${ item.pvp }</td>
                     </tr>`
                 })
                   
@@ -553,8 +553,6 @@ export class Factura {
     }
 
     async generarFacturaPDF( data, url_image ){
-
-      console.log( data.productos );
 
       const content = this.plantilla( data, url_image );
   
