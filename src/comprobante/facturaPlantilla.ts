@@ -374,7 +374,7 @@ export class Factura {
               style="font-size: 9px;line-height: 15px;">
               <div class="d-flex justify-content-center">
                 <img src="${ url_image }" 
-                style="max-width: 120px;height: auto;position: relative; top: 20px" class="rounded">
+                style="max-width: 120px;height: auto;" class="rounded">
               </div>
               <div class="d-flex justify-content-center mt-1 fw-bolder">
                 ${ data.cliente.empresa.razon_social }
