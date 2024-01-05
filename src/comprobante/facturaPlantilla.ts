@@ -31,7 +31,7 @@ export class Factura {
             <div class="col-6">
               <div class="mt-3 d-flex justify-content-center">
                 <img src="${ url_image }" 
-                style="max-width: 120px;height: auto;" class="rounded">
+                style="max-width: 140px;height: auto;" class="rounded">
               </div>
               <div class="mt-1 backColor pt-1" style="padding-bottom: 92px;">
                 <div style="padding-left: 13px">
@@ -96,7 +96,8 @@ export class Factura {
                   </div>
                   <div class="mt-3">
                     <label class="d-block">
-                      <span class="fw-bolder">Ambiente:</span> ${ data.factura.ambiente.toUpperCase() }
+                      <span class="fw-bolder">Ambiente:</span> 
+                      ${ data.factura.ambiente == 'DEV' ? 'PRUEBAS' : 'PRODUCCIÓN' }
                     </label>
                     <label class="d-block">
                       <span class="fw-bolder">Emisión:</span> NORMAL
@@ -552,6 +553,8 @@ export class Factura {
     }
 
     async generarFacturaPDF( data, url_image ){
+
+      console.log( data.productos );
 
       const content = this.plantilla( data, url_image );
   
