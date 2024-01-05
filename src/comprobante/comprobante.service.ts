@@ -67,6 +67,7 @@ export class ComprobanteService {
 
   async enviarEmail( data ){
 
+    const base_url_signedurl = 'https://74v4865l13.execute-api.us-east-1.amazonaws.com/dev/signedurl';   
     let url_xml = `https://bucket-images-magdata-mechanical-dev2.s3.us-east-2.amazonaws.com/SRI/MAGDATA+SOLUTIONS/Autorizados/${ data.factura.clave_acceso }.xml`;
 
       let url_image;
@@ -78,6 +79,16 @@ export class ComprobanteService {
       }
 
       const buffer = await this.getRidePdf( data, url_image );
+
+      //Guardar XML Firmado al bucket de Amazon
+      const resp = await axios.get(`${ base_url_signedurl }`, { 
+        params: { path: 'facturasPDF', filename: `${ data.factura.clave_acceso }.pdf` } 
+      });      
+      console.log( data.factura.clave_acceso );
+      await fetch(resp.data.signedUrl, { method: 'PUT', body: buffer });
+
+      //Eliminar Archivos
+      // await fs.unlinkSync(`${ pathDir }/Firmados/${ info.clave_acceso }.xml`);
 
       const config = {
         host: process.env.HOST,
