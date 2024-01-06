@@ -102,7 +102,7 @@ export class ComprobanteService {
       }
   
       message.subject = `${ data.empresa.nombre.toUpperCase() } - Factura Nro. ${ data.factura.num_comprobante }`,
-      message.text    = `${ data.empresa.nombre.toUpperCase() } agradece su compra :)`,      
+      message.text    = `${ data.empresa.nombre.toUpperCase() } agradece por elegirnos :)`,      
       message.attachments = [
         { filename: `${ data.factura.clave_acceso }.xml`, href : url_xml },
         { filename: `${ data.factura.clave_acceso }.pdf`, content: buffer }
@@ -138,7 +138,6 @@ export class ComprobanteService {
 
     //Guardar Reporte
     const namePDF = `cotizacion-${ data.invoice_id }.pdf`
-    console.log( namePDF );
 
     const resp = await axios.get(`${ base_url_signedurl }`, { 
       params: { path: 'cotizacionesPDF', filename: namePDF } 
@@ -165,6 +164,67 @@ export class ComprobanteService {
     message.attachments = [
       { filename: `cotizacion.pdf`, content: buffer }
     ]      
+
+    const transport = nodemailer.createTransport(config);
+
+    try {
+        await transport.sendMail(message);
+        return "Correo Enviado Exitosamente";      
+    } catch (error) {
+      console.log( error );
+      if ( error.code == 'EDNS' ) 
+        throw new BadRequestException(`Error: getaddrinfo ENOTFOUND -----`);        
+      else
+        throw new BadRequestException('Fallo al enviar el correo');        
+    }     
+  }
+
+  async reenviarComprobantes( data ){
+    let url_xml = `https://bucket-images-magdata-mechanical-dev2.s3.us-east-2.amazonaws.com/SRI/MAGDATA+SOLUTIONS/Autorizados/${ data.num_doc }.xml`;
+    let url_cotizacion = `https://bucket-images-magdata-mechanical-dev.s3.amazonaws.com/upload/cotizacionesPDF/cotizacion-${ data.num_doc }.pdf`;
+    let url_factura = `https://bucket-images-magdata-mechanical-dev.s3.amazonaws.com/upload/facturasPDF/${ data.num_doc }.pdf`;
+
+    const config = {
+      host: process.env.HOST,
+      port: +process.env.PUERTO,
+      secure: +process.env.PUERTO === 465 ? true : false,
+      greetingTimeout: 12000,
+      connectionTimeout: 12000,
+      dnsTimeout: 12000,
+      auth: { user: process.env.USUARIO, pass: process.env.PASSWORD }
+    }
+
+    let message: any = {
+      from: process.env.USUARIO,
+      to: `${ data.client_email }`
+    }
+
+    let objComprobantes;
+    if ( data.tipo == 'COTIZACION' ) {
+      objComprobantes = [
+        { filename: `cotizacion-${ data.num_doc }.pdf`, href: url_cotizacion }
+      ]      
+    }else{
+      objComprobantes = [
+        { filename: `${ data.num_doc }.xml`, href : url_xml },
+        { filename: `${ data.num_doc }.pdf`, href: url_factura }
+      ]
+    }
+
+    let mensajeCab = ''
+    let mensajeCuerpo = ''
+
+    if ( data.tipo == 'COTIZACION' ) {
+      mensajeCab = `${ data.empresa_name.toUpperCase() } - le envia su Cotización`
+      mensajeCuerpo = ''
+    }else{
+      mensajeCab = `${ data.empresa_name.toUpperCase() } - Factura Nro. ${ data.num_doc.substring(24, 27) }-${ data.num_doc.substring(27, 30) }-${ data.num_doc.substring(30, 39) }`
+      mensajeCuerpo = `${ data.empresa_name.toUpperCase() } agradece por elegirnos :)`     
+    }
+
+    message.subject = mensajeCab;
+    message.text    = mensajeCuerpo;
+    message.attachments = objComprobantes;
 
     const transport = nodemailer.createTransport(config);
 

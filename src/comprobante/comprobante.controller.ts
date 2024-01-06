@@ -31,4 +31,9 @@ export class ComprobanteController {
     this.comprobanteService.enviarCotizacion( data );
   }
 
+  @Post('/reenviarComprobantes')
+  reenviarComprobantes( @Body() data: any ){
+    this.comprobanteService.reenviarComprobantes( data );
+  }
+
 }
