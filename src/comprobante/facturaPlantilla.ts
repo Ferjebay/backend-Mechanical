@@ -331,8 +331,8 @@ export class Factura {
     }
 
     cotizacion( data, url_image ){
-        const fechaEmision = moment().format('DD/MM/YYYY h:mm:ss a');
-        const fechaVencimiento = moment().add(5, 'days').format('DD/MM/YYYY');
+        const fechaEmision = moment().subtract(5, 'hours').format('DD/MM/YYYY h:mm:ss a');
+        const fechaVencimiento = moment().subtract(5, 'hours').add(5, 'days').format('DD/MM/YYYY');
 
         let html = `<!DOCTYPE html>
         <html lang="en">
