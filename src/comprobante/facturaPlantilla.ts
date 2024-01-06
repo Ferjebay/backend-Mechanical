@@ -4,7 +4,7 @@ const moment = require('moment');
 export class Factura {
 
     plantilla( data, url_image ){
-        const fechaEmision = moment().format('DD/MM/YYYY h:mm:ss a');
+      const fechaEmision = moment().subtract(5, 'hours').format('DD/MM/YYYY h:mm:ss a');
 
         let html = `<!DOCTYPE html>
         <html lang="en">
